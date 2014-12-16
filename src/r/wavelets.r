@@ -8,5 +8,5 @@ wavelet.haar <- function(t, j = 0, k = 0) {
     );
   };
   
-  haar_base(2**j * (t - k));
+  2**j * haar_base(2**j * (t - k));
 }
