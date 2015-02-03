@@ -1,5 +1,5 @@
 generator.Bernoulli <- function(p) {
-  return (function(n){
+  return (function(n){    
     return (rbinom(n, 1, p))
   })
 }
@@ -7,12 +7,12 @@ generator.Bernoulli <- function(p) {
 generator.njoin <- function(first, second, n){
   generated <- 0
   generator.single <- function(){
-    generated <- generated + 1
+    generated <<- generated + 1
     return (ifelse(generated <= n, first(1), second(1)))
   }
   
-  return (function(n){
-    return (replicate(n, generator.single()))
+  return (function(t){
+    return (replicate(t, generator.single()))
   })
 }
 
