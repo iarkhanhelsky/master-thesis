@@ -1,5 +1,52 @@
 ```{r, echo=FALSE, message=FALSE}
   require('ggplot2')
+
+# Multiple plot function
+#
+# ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+# - cols:   Number of columns in layout
+# - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+#
+# If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+# then plot 1 will go in the upper left, 2 will go in the upper right, and
+# 3 will go all the way across the bottom.
+#
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  require(grid)
+
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                    ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+ if (numPlots==1) {
+    print(plots[[1]])
+
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
 ```
 # Разладка последовательности
 
@@ -167,12 +214,13 @@ d.j <- function(X, j) {
 ```
 
 ```{r, fig.cap='j = 1', echo=FALSE}
- djx <- d.j(X, j = 1)
- djy <- d.j(Y, j = 1)
- len <- length(djx)
+plot.j <- function(X, Y, j, func = d.j){
+  djx <- func(X, j = j)
+  djy <- func(Y, j = j)
+  len <- length(djx)
   data <- rbind(
-      data.frame(t=(1:len) - 1, x=djx),
-      data.frame(t=(1:len) - 1, x=djy)      
+    data.frame(t=(1:len) - 1, x=djx),
+    data.frame(t=(1:len) - 1, x=djy)      
     )
   data$Name <- rep(
     c(
@@ -180,66 +228,13 @@ d.j <- function(X, j) {
       "Y"     
       ),
     c(len, len))
-
+  
   ggplot(data,aes(t,x, colour=Name)) + 
     geom_line() 
-```
-```{r, fig.cap='j = 2', echo=FALSE}
-djx <- d.j(X, j = 2)
- djy <- d.j(Y, j = 2)
- len <- length(djx)
-  data <- rbind(
-      data.frame(t=(1:len) - 1, x=djx),
-      data.frame(t=(1:len) - 1, x=djy)      
-    )
-  data$Name <- rep(
-    c(
-      "X",
-      "Y"     
-      ),
-    c(len, len))
+  }
 
-  ggplot(data,aes(t,x, colour=Name)) + 
-    geom_line() 
-```
-
-```{r, fig.cap='j = 3', echo=FALSE}
-djx <- d.j(X, j = 3)
- djy <- d.j(Y, j = 3)
- len <- length(djx)
-  data <- rbind(
-      data.frame(t=(1:len) - 1, x=djx),
-      data.frame(t=(1:len) - 1, x=djy)      
-    )
-  data$Name <- rep(
-    c(
-      "X",
-      "Y"     
-      ),
-    c(len, len))
-
-  ggplot(data,aes(t,x, colour=Name)) + 
-    geom_line() 
-```
-
-```{r, fig.cap='j = 4', echo=FALSE}
-djx <- d.j(X, j = 4)
- djy <- d.j(Y, j = 4)
- len <- length(djx)
-  data <- rbind(
-      data.frame(t=(1:len) - 1, x=djx),
-      data.frame(t=(1:len) - 1, x=djy)      
-    )
-  data$Name <- rep(
-    c(
-      "X",
-      "Y"     
-      ),
-    c(len, len))
-
-  ggplot(data,aes(t,x, colour=Name)) + 
-    geom_line() 
-```
+multiplot(plot.j(X, Y, 0), plot.j(X, Y, 1), plot.j(X, Y, 2), plot.j(X, Y, 3), plot.j(X, Y, 4), plot.j(X, Y, 5), cols=2)
+``` 
 
 ### Пример. Последовательности Бернулевских величин
 
@@ -285,99 +280,13 @@ Y <- 2*Y - 1
     c(len, len))
 
   ggplot(data,aes(t,x, colour=Name)) + 
-    geom_line() 
+    geom_point() 
 ```
 
-Основываясь на дисктретном вейвлет преобразовании, введенном выше, построим периодограммы
-полученного ряда:
-```{r}
-#' DWT - discrete wavelet transform
-#'
-d.jk <- function(X, j, k, wavelet = wavelet.haar){  
-  return(sum(X * wavelet(0:(length(X)-1), j, k)))
-}
+```{r, fig.cap='', echo=FALSE}
+multiplot(plot.j(X, Y, 0), plot.j(X, Y, 1), plot.j(X,Y, 2), plot.j(X,Y, 3), plot.j(X,Y, 4), plot.j(X, Y, 5), cols=2)
 
-#' DWT for current level (periodogramm)
-d.j <- function(X, j) {
-  k.max <- 2^(log2(length(X)) - j) - 1
-  return(sapply(0:k.max, function(k) d.jk(X, j, k)))
-}
-```
-
-```{r, fig.cap='j = 1', echo=FALSE}
- djx <- d.j(X, j = 1)
- djy <- d.j(Y, j = 1)
- len <- length(djx)
-  data <- rbind(
-      data.frame(t=(1:len) - 1, x=djx),
-      data.frame(t=(1:len) - 1, x=djy)      
-    )
-  data$Name <- rep(
-    c(
-      "X",
-      "Y"     
-      ),
-    c(len, len))
-
-  ggplot(data,aes(t,x, colour=Name)) + 
-    geom_line() 
-```
-```{r, fig.cap='j = 2', echo=FALSE}
-djx <- d.j(X, j = 2)
- djy <- d.j(Y, j = 2)
- len <- length(djx)
-  data <- rbind(
-      data.frame(t=(1:len) - 1, x=djx),
-      data.frame(t=(1:len) - 1, x=djy)      
-    )
-  data$Name <- rep(
-    c(
-      "X",
-      "Y"     
-      ),
-    c(len, len))
-
-  ggplot(data,aes(t,x, colour=Name)) + 
-    geom_line() 
-```
-
-```{r, fig.cap='j = 3', echo=FALSE}
-djx <- d.j(X, j = 3)
- djy <- d.j(Y, j = 3)
- len <- length(djx)
-  data <- rbind(
-      data.frame(t=(1:len) - 1, x=djx),
-      data.frame(t=(1:len) - 1, x=djy)      
-    )
-  data$Name <- rep(
-    c(
-      "X",
-      "Y"     
-      ),
-    c(len, len))
-
-  ggplot(data,aes(t,x, colour=Name)) + 
-    geom_line() 
-```
-
-```{r, fig.cap='j = 4', echo=FALSE}
-djx <- d.j(X, j = 4)
- djy <- d.j(Y, j = 4)
- len <- length(djx)
-  data <- rbind(
-      data.frame(t=(1:len) - 1, x=djx),
-      data.frame(t=(1:len) - 1, x=djy)      
-    )
-  data$Name <- rep(
-    c(
-      "X",
-      "Y"     
-      ),
-    c(len, len))
-
-  ggplot(data,aes(t,x, colour=Name)) + 
-    geom_line() 
-```
+``` 
 
 ## Поиск разладки последовательности. Х - критерий
 ```{r}
@@ -395,28 +304,52 @@ P_j <- function(X, j) {
 }
 ```
 
-```{r}
-j <- 1:log2(length(Y)) - 1
-p.j <- sapply(j, function(j) P_j(Y, j))
-qplot(j, p.j, geom='point')
+```{r, fig.cap = 'Bernoulli periodogram'}
+  len <- length(X)
+  j <- 1:log2(len) - 1
+  len <- log2(len)
+  
+  px <- sapply(j, function(j) P_j(X, j))
+  py <- sapply(j, function(j) P_j(Y, j))
+
+  data <- rbind(
+      data.frame(t=(1:len) - 1, x=px),
+      data.frame(t=(1:len) - 1, x=py)      
+    )
+  data$Name <- rep(
+    c(
+      "X",
+      "Y"     
+      ),
+    c(len, len))
+
+  ggplot(data,aes(t,x, colour=Name)) + 
+    geom_point() 
+ 
 ```
 
 ```{r, echo=FALSE}
 experiment <- function(T, tau, theta = 1, gamma = 0, repeats = 100){
     p.values <- function(){
-      values <-2 * generator.sequence(theta, gamma, tau)(2**T) - 1
+      values <-2 * c(generator.Bernoulli(theta)(2^tau), generator.Bernoulli(gamma)(2^(T-tau))) - 1
       print(mean(values))      
       p.values <- sapply(1:(T - 1), function(j) P_j(values, j))  
     }
       
     p <- rowMeans(data.frame(p.values()))
   
-    plot((p), main=sprintf("T %d, Tau %d, Theta %f, Gamma %f", T, tau, theta, gamma), xlab='T' , ylab='p.values')
+    plot(p, main=sprintf("T %d, Tau %d, Theta %f, Gamma %f", T, tau, theta, gamma), , xlab='j' , ylab='p.values')
   }
 
+experiment(10, 2, 0.5, 0.1)
 experiment(10, 5, 0.5, 0.1)
 experiment(10, 8, 0.5, 0.1)
 
-experiment(10, 8, 0.5, 0.3)
+experiment(10, 2, 0.5, 0.3)
 experiment(10, 5, 0.5, 0.3)
+experiment(10, 8, 0.5, 0.3)
+
+experiment(10, 2, 0.5, 0.5)
+experiment(10, 5, 0.5, 0.5)
+experiment(10, 8, 0.5, 0.5)
 ```
