@@ -1,0 +1,422 @@
+```{r, echo=FALSE, message=FALSE}
+  require('ggplot2')
+```
+# Разладка последовательности
+
+## Вейвлет Хаара
+Любая локализованная $\mathbb{R}$-функция $\psi \in L_2(\mathbb{R})$, где $L_2([a,b])$ - множество интегрируемых в квадратах функций, называется $\mathbb{R}$-вейвлетом (или просто вейвлетом), если для нее существует функция $\overset{*}{\psi} \in L_2(\mathbb{R})$ такая, что семейства $\lbrace\psi_{jk}\rbrace$ и $\lbrace\overset{*}{\psi_{jk}}\rbrace$, построенные как
+
+$$
+\psi_{jk}(t) = 2^{j/2}\psi(2^jt-k), ~~ j,k \in \mathbb{Z}
+$$
+
+и
+
+$$
+ \psi^{jk}(t) = \overset{*}{\psi_{jk}}(t) = 2^{j/2}\overset{*}{\psi}(2^jt-k)
+$$
+
+являются парными базисами функционального пространства $L_2(\mathbb{R})$[@daub].
+
+Каждый таким образом определенный вейвлет $\psi$, независимо от того, ортогональный он или нет, позволяет любую функцию $f \in L_2(\mathbb{R})$ представить в виде ряда
+$$
+  f(t) = \sum_{j,k = -\infty}^{\infty} c_{jk}\psi_{jk}(t)
+$$
+
+коэффициенты которого определяются интегральным вейвлет-преобразованием $f$ относительно $\overset{*}{\psi}$.
+Вейвлет-двойник $\overset{*}{\psi}$ -- единственный и сам является $\mathbb{R}$-вейвлетом. Пара $(\psi, \overset{*}{\psi})$ симметрична в том смысле, что $\psi$ в свою очередь является двойником для $\overset{*}{\psi}$.
+Если $\mathbb{R}$-вейвлет $\psi$ обладает свойством ортоганальности, то $\overset{*}{\psi} \equiv \psi$, и $\lbrace \overset{*}{\psi_{jk}} \rbrace \equiv \lbrace \psi_{jk} \rbrace$ -- ортогональный базис.
+
+Для многих практических целей достаточно, чтобы вейвлет обладал свойством полуортогональности, т.е. чтобы его базис Рисса [^riss] $\lbrace \psi_{jk} \rbrace$ удовлетворял условию $\langle \psi_{jk},  \psi_{lm}\rangle = 0$ при $j = l, ~ j,k,l,m \in \mathbb{Z}$.
+
+[^riss]:
+  _Система Рисса_ с постоянными $A$ и $B$ — такая система векторов $\{f_n\}_{n=1}^\infty \in H$ в гильбертовом пространстве *H*, что для любой последовательности комплексных чисел $c=\{c_n\}_{n=1}^\infty \in l_2$ ряд $\sum_{n=1}^\infty c_nf_n$ сходится по норме в *H*, причем
+  $A\|c\|^2_{l_2}\leqslant \left\| \sum_{n=1}^\infty c_n f_n \right\|^2_H \leqslant B\|c\|^2_{l_2}$,
+  _Базис Рисса_ — такая система Рисса, которая является базисом в *H*.
+  Базис Рисса является обобщением понятия ортонормированного базиса, а двойное неравенство, данное в определении — обобщение неравенства Бесселя. Другое название базисов Рисса — _базисы, эквивалентные ортонормированным_.
+  Система векторов является базисом Рисса тогда и только тогда, когда она может быть получена из ортонормированного базиса с помощью ограниченного обратимого преобразования.
+
+$\mathbb{R}$-вейвлет называется неортогональным, если он не является полуортогональным вейвлетом. Однако, будучи $\mathbb{R}$-вейвлетом, он имеет двойника, и пара $(\psi, \overset{*}{\psi})$ дает возможность формировать семейства $\lbrace\psi_{jk}\rbrace$ и $\lbrace\overset{*}{\psi_{jk}}\rbrace$, удовлетворяющие условию биортогональности $\langle \psi_{jk}, \overset{*}{\psi_{lm}}\rangle = \delta_{jl}\delta_{km}, ~~ j,k,l,m \in \mathbb{Z}$ и позволяющие построить полноцыенные ряды по вейвлетам и реконструкционную формулу.
+С необходимостью иметь обратное вейвлет преобразование (или реконструкционную формулу) связано большинство ограничений, накладываемых на вейвлет.
+
+### Реализация вейвлета Хаара
+Материнская вейвлет функция простейшего из вейвлетов, вейвлета Хаара, определяется 
+как функция одного аргумента:
+```{r}
+haar.mother <- function(t) {
+  if(0 <= t && t < 1/2) {
+    return(1)
+  } else if (1/2 <= t && t < 1) {
+    return(-1)
+  } else {
+    return(0)
+  }
+}
+```
+
+Сам же вейвлет определяется как функция трех аргументов:
+```{r}
+haar.jk <- function(t, j, k) {
+  return(2^(-j/2) * haar.mother(2^-j * t - k))
+}
+```
+
+Или в векторной реализации
+```{r}
+wavelet.haar <- function(t, j = 0, k = 0) {
+  return(Vectorize(function(t) haar.jk(t, j, k))(t))
+}
+```
+
+Построим для примера несколько графиков вейвлетов
+
+```{r, fig.cap='Примеры вейвлетов Хаара с различными параметрами смещения и масштаба', echo=FALSE}
+  t <- seq(-5, 5, 0.001)
+
+  psi <- wavelet.haar
+
+  data <- rbind(
+      data.frame(t = t, psi = psi(t)),
+      data.frame(t = t, psi = psi(t, 2, 1)),
+      data.frame(t = t, psi = psi(t, -2, -3)),
+      data.frame(t=  t, psi = psi(t, 1, 2))
+    )
+  data$params <- rep(
+    c(
+      "j = 0, k = 0",
+      "j = 2, k = 1",
+      "j = -2, k = -3",
+      "j = 1, k = 2"
+      ),
+    c(length(t), length(t), length(t), length(t)))
+
+  ggplot(data,aes(t,psi, colour=params)) + 
+    geom_line() +
+    ylab(expression(psi))    
+```
+
+## Дискретное вейвлет преобразование и его асимптотические свойства
+
+Пусть $X(t), ~ t=\overline{0,T-1}$ -- есть стационарный временной ряд с нулевым
+средним, длинный $T$, такой что $T = 2^M$. Дискретным вейвлет преобразованием
+для переменных $j = 0, 1,\dots, M; ~ k = 0, 1, \dots T$ назовем функцию
+$$
+d_{jk}^{\psi}(X) = \sum_{t=0}^{T-1}X(t)  \psi_{jk}(t)
+$$
+
+Тогда, очевидно следует, что 
+$$
+E[d_{jk}^{\psi}(X)] = E[\sum_{t=0}^{T-1}X(t)  \psi_{jk}(t)] = \sum_{t=0}^{T-1}E[X(t)\psi_{jk}(t)] = \sum_{t=0}^{T-1}E[X(t)]E[\psi_{jk}(t)] = 0
+$$
+
+и 
+$$
+ var(d_{jk}^{\psi}(X)) = ...
+$$
+
+
+### Пример. Авторегрессия порядка 1
+```{r, echo=FALSE}
+alpha = 0.8
+sd = 1
+```
+
+Пусть $X$ -- авторегресионный ряд порядка 1, с параметром $\alpha = `r 0.8`$ и дисперсией ошибки $\sigma^2 = `r sd`$:
+
+```{r}
+ar.1 <- function(n, alpha, sigma.sq = 1) {
+  return(Reduce(1:n, init=0, f=function(a, x) c(a, a[length(a)] * alpha + rnorm(1))))
+}
+
+X <- ar.1(64, 0.8)
+Y <- X 
+Y[28] = -X[28]
+```
+
+```{r, echo=FALSE, fig.cap='Авторегресионный ряд порядка 1'}
+  len <- length(X)
+  data <- rbind(
+      data.frame(t=(1:len) - 1, x=X),
+      data.frame(t=(1:len) - 1, x=Y)      
+    )
+  data$Name <- rep(
+    c(
+      "X",
+      "Y"     
+      ),
+    c(len, len))
+
+  ggplot(data,aes(t,x, colour=Name)) + 
+    geom_line() 
+```
+
+Основываясь на дисктретном вейвлет преобразовании, введенном выше, построим периодограммы
+полученного ряда:
+```{r}
+#' DWT - discrete wavelet transform
+#'
+d.jk <- function(X, j, k, wavelet = wavelet.haar){  
+  return(sum(X * wavelet(0:(length(X)-1), j, k)))
+}
+
+#' DWT for current level (periodogramm)
+d.j <- function(X, j) {
+  k.max <- 2^(log2(length(X)) - j) - 1
+  return(sapply(0:k.max, function(k) d.jk(X, j, k)))
+}
+```
+
+```{r, fig.cap='j = 1', echo=FALSE}
+ djx <- d.j(X, j = 1)
+ djy <- d.j(Y, j = 1)
+ len <- length(djx)
+  data <- rbind(
+      data.frame(t=(1:len) - 1, x=djx),
+      data.frame(t=(1:len) - 1, x=djy)      
+    )
+  data$Name <- rep(
+    c(
+      "X",
+      "Y"     
+      ),
+    c(len, len))
+
+  ggplot(data,aes(t,x, colour=Name)) + 
+    geom_line() 
+```
+```{r, fig.cap='j = 2', echo=FALSE}
+djx <- d.j(X, j = 2)
+ djy <- d.j(Y, j = 2)
+ len <- length(djx)
+  data <- rbind(
+      data.frame(t=(1:len) - 1, x=djx),
+      data.frame(t=(1:len) - 1, x=djy)      
+    )
+  data$Name <- rep(
+    c(
+      "X",
+      "Y"     
+      ),
+    c(len, len))
+
+  ggplot(data,aes(t,x, colour=Name)) + 
+    geom_line() 
+```
+
+```{r, fig.cap='j = 3', echo=FALSE}
+djx <- d.j(X, j = 3)
+ djy <- d.j(Y, j = 3)
+ len <- length(djx)
+  data <- rbind(
+      data.frame(t=(1:len) - 1, x=djx),
+      data.frame(t=(1:len) - 1, x=djy)      
+    )
+  data$Name <- rep(
+    c(
+      "X",
+      "Y"     
+      ),
+    c(len, len))
+
+  ggplot(data,aes(t,x, colour=Name)) + 
+    geom_line() 
+```
+
+```{r, fig.cap='j = 4', echo=FALSE}
+djx <- d.j(X, j = 4)
+ djy <- d.j(Y, j = 4)
+ len <- length(djx)
+  data <- rbind(
+      data.frame(t=(1:len) - 1, x=djx),
+      data.frame(t=(1:len) - 1, x=djy)      
+    )
+  data$Name <- rep(
+    c(
+      "X",
+      "Y"     
+      ),
+    c(len, len))
+
+  ggplot(data,aes(t,x, colour=Name)) + 
+    geom_line() 
+```
+
+### Пример. Последовательности Бернулевских величин
+
+
+Пусть $X$ -- последовательность случайных величин Бернулли с параметром $p = 0.5$. А $Y$ - 
+последовательность полученная следующим образом:
+$$
+Y(t) = \begin{cases}
+  X(t), t < 2^{\tau} \\
+  Be(q), 2^{\tau} <= t <=2^{T} \\
+\end{cases}
+$$
+
+```{r}
+generator.Bernoulli <- function(p) {
+  return (function(n){    
+    return (rbinom(n, 1, p))
+  })
+}
+
+
+X <- generator.Bernoulli(0.5)(64)
+Y <- c(X[1:32], generator.Bernoulli(0.3)(32))
+```
+
+Преобразуем данные последовательности следующим образом:
+```{r}
+X <- 2*X - 1
+Y <- 2*Y - 1
+```
+
+```{r, echo=FALSE, fig.cap='Бернулевские ряды'}
+  len <- length(X)
+  data <- rbind(
+      data.frame(t=(1:len) - 1, x=X),
+      data.frame(t=(1:len) - 1, x=Y)      
+    )
+  data$Name <- rep(
+    c(
+      "X",
+      "Y"     
+      ),
+    c(len, len))
+
+  ggplot(data,aes(t,x, colour=Name)) + 
+    geom_line() 
+```
+
+Основываясь на дисктретном вейвлет преобразовании, введенном выше, построим периодограммы
+полученного ряда:
+```{r}
+#' DWT - discrete wavelet transform
+#'
+d.jk <- function(X, j, k, wavelet = wavelet.haar){  
+  return(sum(X * wavelet(0:(length(X)-1), j, k)))
+}
+
+#' DWT for current level (periodogramm)
+d.j <- function(X, j) {
+  k.max <- 2^(log2(length(X)) - j) - 1
+  return(sapply(0:k.max, function(k) d.jk(X, j, k)))
+}
+```
+
+```{r, fig.cap='j = 1', echo=FALSE}
+ djx <- d.j(X, j = 1)
+ djy <- d.j(Y, j = 1)
+ len <- length(djx)
+  data <- rbind(
+      data.frame(t=(1:len) - 1, x=djx),
+      data.frame(t=(1:len) - 1, x=djy)      
+    )
+  data$Name <- rep(
+    c(
+      "X",
+      "Y"     
+      ),
+    c(len, len))
+
+  ggplot(data,aes(t,x, colour=Name)) + 
+    geom_line() 
+```
+```{r, fig.cap='j = 2', echo=FALSE}
+djx <- d.j(X, j = 2)
+ djy <- d.j(Y, j = 2)
+ len <- length(djx)
+  data <- rbind(
+      data.frame(t=(1:len) - 1, x=djx),
+      data.frame(t=(1:len) - 1, x=djy)      
+    )
+  data$Name <- rep(
+    c(
+      "X",
+      "Y"     
+      ),
+    c(len, len))
+
+  ggplot(data,aes(t,x, colour=Name)) + 
+    geom_line() 
+```
+
+```{r, fig.cap='j = 3', echo=FALSE}
+djx <- d.j(X, j = 3)
+ djy <- d.j(Y, j = 3)
+ len <- length(djx)
+  data <- rbind(
+      data.frame(t=(1:len) - 1, x=djx),
+      data.frame(t=(1:len) - 1, x=djy)      
+    )
+  data$Name <- rep(
+    c(
+      "X",
+      "Y"     
+      ),
+    c(len, len))
+
+  ggplot(data,aes(t,x, colour=Name)) + 
+    geom_line() 
+```
+
+```{r, fig.cap='j = 4', echo=FALSE}
+djx <- d.j(X, j = 4)
+ djy <- d.j(Y, j = 4)
+ len <- length(djx)
+  data <- rbind(
+      data.frame(t=(1:len) - 1, x=djx),
+      data.frame(t=(1:len) - 1, x=djy)      
+    )
+  data$Name <- rep(
+    c(
+      "X",
+      "Y"     
+      ),
+    c(len, len))
+
+  ggplot(data,aes(t,x, colour=Name)) + 
+    geom_line() 
+```
+
+## Поиск разладки последовательности. Х - критерий
+```{r}
+P_j <- function(X, j) {
+  
+  d <- d.jk
+  
+  I_jk <- function(X, j, k) {d(X, j, k) ** 2}
+  
+  I_j <- function(X, j) { max(sapply(c(0:((2^log2(length(X))) / 2^(j+1) )), FUN=function(k){I_jk(X, j, k)}))}
+  
+  F_hi2 <- function(t) { t**(-1/2) * exp(-t/2) / sqrt(2*pi) }
+  
+  return (1 - (dchisq(I_j(X, j), 1) ** (log2(length(X)) - j)))
+}
+```
+
+```{r}
+j <- 1:log2(length(Y)) - 1
+p.j <- sapply(j, function(j) P_j(Y, j))
+qplot(j, p.j, geom='point')
+```
+
+```{r, echo=FALSE}
+experiment <- function(T, tau, theta = 1, gamma = 0, repeats = 100){
+    p.values <- function(){
+      values <-2 * generator.sequence(theta, gamma, tau)(2**T) - 1
+      print(mean(values))      
+      p.values <- sapply(1:(T - 1), function(j) P_j(values, j))  
+    }
+      
+    p <- rowMeans(data.frame(p.values()))
+  
+    plot((p), main=sprintf("T %d, Tau %d, Theta %f, Gamma %f", T, tau, theta, gamma), xlab='T' , ylab='p.values')
+  }
+
+experiment(10, 5, 0.5, 0.1)
+experiment(10, 8, 0.5, 0.1)
+
+experiment(10, 8, 0.5, 0.3)
+experiment(10, 5, 0.5, 0.3)
+```

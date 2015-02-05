@@ -33,6 +33,10 @@ csl: style/citations.csl
 ```
 ```{r, child='Rmd/sequence.Rmd'}
 ```
+
+```{r, child='Rmd/seq.Rmd'}
+```
+
 \appendix
 ```{r, child='Rmd/appseq.Rmd'}
 ```

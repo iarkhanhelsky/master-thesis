@@ -1,3 +1,13 @@
+#' DWT - discrete wavelet transform
+#'
+d.jk <- function(X, j, k, wavelet = wavelet.haar){
+  k.max <- 2^(log2(length(X)) + j) - 1
+  return(sum(X * wavelet(0:length(X), j, k)))
+}
+
+
+
+
 P_j <- function(X, j) {
   
   d <- function(X, j, k) {
