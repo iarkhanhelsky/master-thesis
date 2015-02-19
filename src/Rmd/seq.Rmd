@@ -296,11 +296,17 @@ P_j <- function(X, j) {
   
   I_jk <- function(X, j, k) {d(X, j, k) ** 2}
   
-  I_j <- function(X, j) { max(sapply(c(0:((2^log2(length(X))) / 2^(j+1) )), FUN=function(k){I_jk(X, j, k)}))}
+  I_j <- function(X, j) { 
+    jk <- sapply(c(0:((2^log2(length(X))) / 2^(j+1) )), FUN=function(k){I_jk(X, j, k)})
+    list(max.value = max(jk), max.k = which.max(jk))
+  }
   
-  F_hi2 <- function(t) { t**(-1/2) * exp(-t/2) / sqrt(2*pi) }
+  ij <- I_j(X, j)
+  print(length(ij$max.value))
+  p.value <- (1 - (dchisq(ij$max.value, 1) ** (log2(length(X)) - j)))
+  k <- ij$max.k
   
-  return (1 - (dchisq(I_j(X, j), 1) ** (log2(length(X)) - j)))
+  list(p.value = p.value, k = k)
 }
 ```
 
@@ -309,8 +315,8 @@ P_j <- function(X, j) {
   j <- 1:log2(len) - 1
   len <- log2(len)
   
-  px <- sapply(j, function(j) P_j(X, j))
-  py <- sapply(j, function(j) P_j(Y, j))
+  px <- sapply(j, function(j) P_j(X, j)$p.value)
+  py <- sapply(j, function(j) P_j(Y, j)$p.value)
 
   data <- rbind(
       data.frame(t=(1:len) - 1, x=px),
@@ -329,16 +335,18 @@ P_j <- function(X, j) {
 ```
 
 ```{r, echo=FALSE}
-experiment <- function(T, tau, theta = 1, gamma = 0, repeats = 100){
-    p.values <- function(){
+experiment <- function(T, tau, theta = 1, gamma = 0){
+    p.values <- function() {
       values <-2 * c(generator.Bernoulli(theta)(2^tau), generator.Bernoulli(gamma)(2^(T-tau))) - 1
-      print(mean(values))      
       p.values <- sapply(1:(T - 1), function(j) P_j(values, j))  
     }
       
-    p <- rowMeans(data.frame(p.values()))
+    p <- p.values()
+    k <- mapply(k = p["k", ], j=1:(T-1), function(j,k) round(2^j * (k + 0.5)))
+    p <- sapply(p["p.value", ], identity)
   
     plot(p, main=sprintf("T %d, Tau %d, Theta %f, Gamma %f", T, tau, theta, gamma), , xlab='j' , ylab='p.values')
+    plot(k, main=sprintf("T %d, Tau %d, Theta %f, Gamma %f", T, tau, theta, gamma), , xlab='j' , ylab='k')
   }
 
 experiment(10, 2, 0.5, 0.1)
