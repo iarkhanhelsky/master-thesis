@@ -1,5 +1,5 @@
 ---
-title: Анализ разладки последовательности
+title: Анализ изображений на основе вейвлетов Добеши
 bibliography: references.bib
 csl: style/citations.csl
 ---
@@ -16,29 +16,10 @@ csl: style/citations.csl
 
 
 ```{r, echo=FALSE}
- sum.lazy <- function(gen, count){
-   c <- 0
-   s <- 0
-   while(c < count){
-     c <- c + 1
-     s <- s + gen(1)
-   }
-
-   reutrn(s)
- }
-```
-```{r, child='Rmd/intro.Rmd'}
-```
-```{r, child='Rmd/wavelets.Rmd'}
-```
-```{r, child='Rmd/sequence.Rmd'}
 ```
 
 ```{r, child='Rmd/seq.Rmd'}
 ```
 
-\appendix
-```{r, child='Rmd/appseq.Rmd'}
-```
 
 # Ссылки

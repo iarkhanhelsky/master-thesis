@@ -1,4 +1,5 @@
 output:
+  fontfamily: libertine
   pdf_document:
     keep_tex: true
     toc: on

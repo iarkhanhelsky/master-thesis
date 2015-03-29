@@ -6,8 +6,6 @@ d.jk <- function(X, j, k, wavelet = wavelet.haar){
 }
 
 
-
-
 P_j <- function(X, j) {
   
   d <- function(X, j, k) {
