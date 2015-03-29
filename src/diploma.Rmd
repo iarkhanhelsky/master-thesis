@@ -6,6 +6,10 @@ csl: style/citations.csl
 
 ```{r, echo=FALSE, message=FALSE}
   require('ggplot2')
+  require('grid')
+
+  # Helpers for plotting
+  source('r/helpers/visual.r')
 
   source('r/wavelets.r')
   psi <- wavelet.haar
