@@ -43,3 +43,23 @@ visual.multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
     }
   }
 }
+
+
+plot.j <- function(X, Y, j, func = d.j){
+  djx <- func(X, j = j)
+  djy <- func(Y, j = j)
+  len <- length(djx)
+  data <- rbind(
+    data.frame(t=(1:len) - 1, x=djx),
+    data.frame(t=(1:len) - 1, x=djy)      
+    )
+  data$Series <- rep(
+    c(
+      "X",
+      "Y"     
+      ),
+    c(len, len))
+  
+  ggplot(data,aes(t,x, colour=Series, linetype=Series)) + 
+    geom_line() 
+  }

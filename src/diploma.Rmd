@@ -15,7 +15,8 @@ csl: style/citations.csl
   psi <- wavelet.haar
 
   source('r/statistics.r')
-  source('r/generators.r')         
+  source('r/generators.r')  
+  source('r/model.data.r')       
 ```
 
 

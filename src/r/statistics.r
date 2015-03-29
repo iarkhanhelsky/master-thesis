@@ -1,25 +1,26 @@
 #' DWT - discrete wavelet transform
 #'
 d.jk <- function(X, j, k, wavelet = wavelet.haar){
-  k.max <- 2^(log2(length(X)) + j) - 1
-  return(sum(X * wavelet(0:length(X), j, k)))
+  return(sum(X * wavelet(1:length(X), j, k)))
 }
 
 
 P_j <- function(X, j) {
   
-  d <- function(X, j, k) {
-    t <- 2**(-j/2) * (sum(X[(2**j * k) : (2**j * (k + 1/2) - 1)]) - sum(X[(2**j * (k + 1/2)) : (2**j * (k+1) - 1)]))
-    return(t)
-  }
+  d <- d.jk
   
   I_jk <- function(X, j, k) {d(X, j, k) ** 2}
   
-  I_j <- function(X, j) { max(sapply(c(0:((2^log2(length(X))) / 2^(j+1) )), FUN=function(k){I_jk(X, j, k)}))}
+  I_j <- function(X, j) { 
+    jk <- sapply(c(0:((2^log2(length(X))) / 2^(j+1) )), FUN=function(k){I_jk(X, j, k)})
+    list(max.value = max(jk), max.k = which.max(jk))
+  }
   
-  F_hi2 <- function(t) { t**(-1/2) * exp(-t/2) / sqrt(2*pi) }
+  ij <- I_j(X, j)
+  p.value <- (1 - (dchisq(ij$max.value, 1) ** (log2(length(X)) - j)))
+  k <- ij$max.k
   
-  return (1 - (dchisq(I_j(X, j), 1) ** (log2(length(X)) - j)))
+  list(p.value = p.value, k = k)
 }
 
 #' Wavelet autocorellation function generator
