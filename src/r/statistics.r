@@ -4,7 +4,6 @@ d.jk <- function(X, j, k, wavelet = wavelet.haar){
   return(sum(X * wavelet(1:length(X), j, k)))
 }
 
-
 P_j <- function(X, j) {
   
   d <- d.jk

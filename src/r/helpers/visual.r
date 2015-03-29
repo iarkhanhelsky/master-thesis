@@ -60,6 +60,5 @@ plot.j <- function(X, Y, j, func = d.j){
       ),
     c(len, len))
   
-  ggplot(data,aes(t,x, colour=Series, linetype=Series)) + 
-    geom_line() 
+  ggplot(data,aes(t,x, colour=Series, linetype=Series)) + geom_line() 
   }
