@@ -4,7 +4,8 @@ image.read <- function(src) {
 	read.routes <- hash()
 	read.routes[['png']] <- readPNG
 	ext <- tolower(file_ext(src))
-	stopifnot(read.routes[[ext]])
+	
+	stopifnot(!is.null(read.routes[[ext]]))
 
 	return(read.routes[[ext]](src))
 }
@@ -15,9 +16,7 @@ image.bytes <- function(floats, color.quant = 255) {
 }
 
 image.bits <- function(data, keep = 8) {
-	bytes <- ifelse(is.integer(data), data, image.bytes(data))
-
-	apply(bytes, 1:length(dim(bytes)), integer.bits, keep = keep)
+	apply(data, 1:length(dim(data)), integer.bits, keep = keep)
 }
 
 integer.bits <- function(x, keep = 8) {
