@@ -1,6 +1,10 @@
 require('png')
 require('tools')
 require('hash')
+require('abind')
+
+COLOR_QUANT <- 255
+COLOR_BITS <- as.integer(log2(COLOR_QUANT)) + 1
 
 image.read <- function(src) {
 	read.routes <- hash()
@@ -13,14 +17,18 @@ image.read <- function(src) {
 }
 
 
-image.bytes <- function(floats, color.quant = 255) {
-	apply(floats, 1:length(dim(floats)), function(x) as.integer(x * color.quant))
+image.bytes <- function(floats) {
+	apply(floats, 1:length(dim(floats)), function(x) as.integer(x * COLOR_QUANT))
 }
 
-image.bits <- function(data, keep = 8) {
-	apply(data, 1, integer.bits, keep = keep)
+image.bits <- function(data) {
+	data <- if(is.integer(data)) data else image.bytes(data)
+	word.length <- COLOR_BITS
+	dim.len <- length(dim(data))
+	result.dim <- c(dim(data), word.length)
+	aperm(apply(data, 1:dim.len, integer.bits, word.length = word.length), c(c(1:dim.len) + 1, 1))
 }
 
-integer.bits <- function(x, keep = 8) {
-	intToBits(x)
+integer.bits <- function(x, word.length) {
+	as.integer(intToBits(x))[1:word.length]
 }
