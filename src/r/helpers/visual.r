@@ -51,14 +51,21 @@ plot.j <- function(X, Y, j, func = d.j){
   len <- length(djx)
   data <- rbind(
     data.frame(t=(1:len) - 1, x=djx),
-    data.frame(t=(1:len) - 1, x=djy)      
+    data.frame(t=(1:len) - 1, x=djy)
     )
   data$Series <- rep(
     c(
       "X",
-      "Y"     
+      "Y"
       ),
     c(len, len))
-  
-  ggplot(data,aes(t,x, colour=Series, linetype=Series)) + geom_line() 
+
+  ggplot(data,aes(t,x, colour=Series, linetype=Series)) + geom_line()
   }
+
+
+plot.probabilities <- function(data) {
+  h <- hist(data, breaks = 100, plot=FALSE)
+  h$counts <- h$counts/sum(h$counts)
+  plot(h)
+}

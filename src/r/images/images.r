@@ -32,3 +32,5 @@ image.bits <- function(data) {
 integer.bits <- function(x, word.length) {
 	as.integer(intToBits(x))[1:word.length]
 }
+
+
