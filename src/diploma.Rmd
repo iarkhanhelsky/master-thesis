@@ -1,7 +1,7 @@
 ---
-title: Анализ изображений на основе вейвлетов Добеши
-bibliography: references.bib
+title: "Анализ изображений на основе вейвлетов Добеши"
 csl: style/citations.csl
+bibliography: references.bib
 ---
 
 ```{r, echo=FALSE, message=FALSE}
@@ -22,8 +22,22 @@ csl: style/citations.csl
 
 ```{r, echo=FALSE}
 ```
+```{r, child='Rmd/intro.Rmd'}
+```
+```{r, child='Rmd/wavelets.Rmd'}
+```
+```{r, child='Rmd/approximation.Rmd'}
+```
+```{r, child='Rmd/integration.Rmd'}
+```
+```{r, child='Rmd/sequence.Rmd'}
+```
 
-```{r, child='Rmd/seq.Rmd'}
+```{r, child='Rmd/2dtransform.Rmd'}
+```
+```{r, child='Rmd/compression.Rmd'}
+```
+```{r, child='Rmd/similarity.Rmd'}
 ```
 
 

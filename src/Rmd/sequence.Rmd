@@ -71,36 +71,3 @@ $$
 , где $\varepsilon = \frac{\varepsilon^0}{T}$,
 иначе принимаем $H_1$.
 
-### Эксперимент
-```{r}
-experiment <- function(T, tau, theta = 1, gamma = 0, repeats = 100){
-    p.values <- function(){
-      values <-2 * generator.sequence(theta, gamma, tau)(2**T) - 1
-      print(mean(values))      
-      p.values <- sapply(1:(T - 1), function(j) P_j(values, j))  
-    }
-      
-    p <- rowMeans(data.frame(p.values()))
-  
-    plot((p), main=sprintf("T %d, Tau %d, Theta %f, Gamma %f", T, tau, theta, gamma), xlab='T' , ylab='p.values')
-  }
-```
-
-```{r}
-  t <- 2*sapply((0:1023), function(t) t %% 2) - 1
-  p.values <- sapply(0:log(length(t))/log(2), function(j) P_j(t, j))  
-  plot(p.values, xlab='j')
-  t[128:256] = 0
-  plot(t)
-  p.values <- sapply(0:log(length(t))/log(2), function(j) P_j(t, j))  
-  print(length(p.values))
-  plot(p.values, xlab='j')
-```
-
-
-
-```{r}
-  for(gamma in seq(0, 0.5, 0.1)) {
-      experiment(14, 12, 0.5, gamma)
-  }
-```

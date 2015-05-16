@@ -161,7 +161,8 @@ $$
 
 \Example{Авторегрессия порядка 1}
 ```{r, echo=FALSE}
-alpha = 0.8, sd = 1
+alpha = 0.8
+sd = 1
 ```
 
 Пусть $X$ -- реализация авторегресионного ряда порядка 1[^auto], с параметром $\alpha = `r 0.8`$ и дисперсией ошибки $\sigma^2 = `r sd`$, длинны $T = 64$. Пусть, также, $Y$ -- преобразованный ряд $X$, такой что: 
@@ -310,8 +311,8 @@ Cформулируем критерий определения существо
   j <- 1:log2(len) - 1
   len <- log2(len)
   
-  px <- sapply(j, function(j) P_j(X, j)$p.value)
-  py <- sapply(j, function(j) P_j(Y, j)$p.value)
+  px <- sapply(j, function(j) P.j(X, j))
+  py <- sapply(j, function(j) P.j(Y, j))
 
   data <- rbind(
       data.frame(t=(1:len) - 1, x=px),
@@ -407,12 +408,10 @@ $$
 experiment <- function(T, tau, theta = 1, gamma = 0){
     p.values <- function() {
       values <-2 * c(generator.Bernoulli(theta)(2^tau), generator.Bernoulli(gamma)(2^(T-tau))) - 1
-      p.values <- sapply(1:(T - 1), function(j) P_j(values, j))  
+      p.values <- sapply(1:(T - 1), function(j) P.j(values, j))  
     }
       
     p <- p.values()
-    k <- mapply(k = p["k", ], j=1:(T-1), function(j,k) round(2^j * (k + 0.5)))
-    p <- sapply(p["p.value", ], identity)
   
     plot(p, main=sprintf("T %d, Tau %d, Theta %f, Gamma %f", T, tau, theta, gamma), , xlab='j' , ylab='p.values')
   }
