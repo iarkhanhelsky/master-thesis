@@ -2,56 +2,5 @@ Image Bits
 ========================================================
 
 ```{r echo=FALSE, message=FALSE}
-source('r/images/images.r')
-lenna <- image.read('res/Lenna.png')
-require('ggplot2')
 
-freqs <- function(data) {
-  sapply(unique(data), function(t) sum(data == t) / length(data))
-}
-
-```
-
-```{r, echo=FALSE}
-model.length <- 10000
-p.good <- 0.5
-p.bad <- 0.3
-```
-
-Построим модельную последовательность Бернулли длины $n =$ `r model.length`, с параметром $p = `r p.good`$
-```{r, echo=FALSE}
-  model <- rbinom(model.length, 1, p.good)
-  qplot(model, binwidth=1)
-```
-
-Проведем проверку распределения модельных данных с помощью теста $chi^2$: 
-```{r}
-  test <- chisq.test(freqs(model))  
-  p.value <<- test$p.value
-  test
-```
-Гипотеза _`r ifelse(p.value > 0.95, 'принята', 'отвергнута')`_
-
-Сгеренируем модельную последовательность Бернулли $n =$ `r model.length`, с параметром $p = `r p.bad`$
-```{r, echo=FALSE}
-  model <- rbinom(model.length, 1, p.bad)
-  qplot(model, binwidth=1)
-```
-
-Проведем проверку распределения модельных данных с помощью теста $chi^2$: 
-```{r}
-  test <- chisq.test(freqs(model))  
-  p.value <<- test$p.value
-  test
-```
-
-Гипотеза _`r ifelse(p.value > 0.95, 'принята', 'отвергнута')`_
-
-# Проверка распределения младших бит значений цветовых компонент картинки.
-
-```{r}
-  lenna.bytes <- image.bytes(lenna)
-  lenna.red <- lenna.bytes[, , 1]
-  lenna.green <- lenna.bytes[, , 2]
-  lenna.blue <- lenna.bytes[, , 3]
 ```

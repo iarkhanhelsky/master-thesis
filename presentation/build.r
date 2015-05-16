@@ -6,6 +6,6 @@ getFilename <- function() {
    else
      invisible(NULL)
 }
-setwd(paste(dirname(normalizePath(getFilename())),'/src', sep=""))
+# setwd(paste(dirname(normalizePath(getFilename())),'/src', sep=""))
 require('rmarkdown')
-rmarkdown::render('image_bits.rmd', 'pdf_document', output_dir='../out')
+rmarkdown::render('conference.rmd', 'beamer_presentation', output_dir='../out')
