@@ -3,3 +3,4 @@ out
 .#*
 *.knit.md
 **.RData
+.Rproj.user
