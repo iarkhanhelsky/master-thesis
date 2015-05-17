@@ -8,7 +8,8 @@ output:
         '--listings',
         '--variable', 'documentclass:report',
         '--variable', 'classoption:a4papper,11pt',
-        '--variable', 'geometry:margin=0in'
+
+        '--latex-engine=xelatex'
         ]
     fig_height: 4
     fig_caption: on
