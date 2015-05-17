@@ -21,7 +21,7 @@ theta = 0.3
 gamma = 0.5
 T = 8
 ```
-Для иллюстрации, построим пробную последовательность, длинны $2^{(T + 1)}$, где $T = `r T`$, пологая $\theta=`r theta`, ~ \gamma = `r gamma`$:
+Для иллюстрации, построим пробную последовательность, длинны $2^{(T + 1)}$, где $T = `r T`$, полагая $\theta=`r theta`, ~ \gamma = `r gamma`$:
 ```{r, echo=FALSE}
 rsequence <- generator.sequence(0.1, 0.8, T)
 values <- rsequence(2**(T+1))
