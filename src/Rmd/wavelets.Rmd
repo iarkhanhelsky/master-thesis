@@ -130,7 +130,10 @@ $$
       ),
     c(length(t), length(t), length(t), length(t)))
 
-  ggplot(data,aes(t,psi, colour=params)) + 
+  ggplot(data,aes(t,psi, color=params)) + 
+    scale_fill_discrete(name="Experimental\nCondition",
+                         breaks=c("ctrl", "trt1", "trt2", "d"),
+                         labels=c("Control", "Treatment 1", "Treatment 2", "d")) +
     geom_line() +
     ylab(expression(psi))    
 ```

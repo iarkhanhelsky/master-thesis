@@ -1,21 +1,19 @@
-# Генерация последовательности(модельных данных)
-
 Для генерации последовательности определим несколько вспомогательных функций:
   
   * Функция, которая порождает генератор бернулевской последовательности с заданным параметром p
-```{r, results='markup'}
-generator.Bernoulli
+  Bernoulli
+```{r, code=capture.output(dump('generator.Bernoulli', '')), tidy=TRUE, highlight=TRUE}
+
 ```
 
 * Функция, которая объеденит два генератора, при этом, первые $n$ значений будут получены из первого генератора, а последующие значения будут получены из второго генератора.
-```{r, results='markup'}
-generator.njoin
+```{r, code=capture.output(dump('generator.njoin', '')), tidy=TRUE, highlight=TRUE}
+
 ```
 
 Из двух описанных выше функций, несложно получить генератор порождающий исходные данные для нашей задачи
 
-```{r, results='hold'}
-generator.sequence
+```{r, code=capture.output(dump('generator.sequence', '')), tidy=TRUE, highlight=TRUE}
 ```
 
 ```{r, echo=FALSE}

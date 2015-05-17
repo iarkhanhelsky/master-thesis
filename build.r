@@ -8,4 +8,4 @@ getFilename <- function() {
 }
 setwd(paste(dirname(normalizePath(getFilename())),'/src', sep=""))
 require('rmarkdown')
-rmarkdown::render('diploma.Rmd', 'pdf_document', output_dir='../out')
+rmarkdown::render('diploma.Rmd', 'pdf_document', output_dir='../out', encoding='UTF-8')

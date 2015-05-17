@@ -5,8 +5,11 @@ bibliography: references.bib
 ---
 
 ```{r, echo=FALSE, message=FALSE}
-  require('ggplot2')
-  require('grid')
+  require(ggplot2)
+  require(grid)
+  require(reshape2)
+
+  globals <- list(discorded.test.count=100)
 
   # Helpers for plotting
   source('r/helpers/visual.r')
@@ -40,5 +43,12 @@ bibliography: references.bib
 ```{r, child='Rmd/similarity.Rmd'}
 ```
 
+\appendix
 
-# Ссылки
+# Приложение {-}
+
+## Генерация модельных данных для решения задачи о разладке бинарной последовательности
+```{r, child='Rmd/appendix/datageneration.Rmd'}
+```
+
+# Ссылки {-}
