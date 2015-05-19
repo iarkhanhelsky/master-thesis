@@ -63,7 +63,7 @@ $$
 $$
 
 $$
-\delta^H_{\lambda} (d_{jk}) = \begin{cases}
+\delta^S_{\lambda} (d_{jk}) = \begin{cases}
     0, ~ |d_{jk}| \leq \lambda \\
     d_{jk} - \lambda, ~ d_{jk} > \lambda \\
     d_{jk} + \lambda, ~ d_{jk} < -\lambda \\
@@ -84,5 +84,60 @@ $$
 
 
 ## SureShrink
+Донобо и Йоханстнон в своей работе [@donobo3] предложили схему, которая применяет $\lambda_j$ -- пороговое значение зависящее от уровня к вейвлет коэффициентам $d_{jk}$. Их схема основывается на небайесовском риске Штейна[@sure], который определяется следующим образом.
+
+Пусть величины $X_1, \dots, X_s$ независимы и одинаково распределены с нормальным законом $\mathcal{N} (\mu_i, ~ 1), ~ (i = 1, \dots, s) $. Задача состоит в том, чтобы оценить вектор средних $\mu = (\mu_1, \dots \mu_s)$ из известной выборки $\boldsymbol{x} = (X_1, \dots, X_s)$ с мимимальным риском. Иными словами необходимо найти оценку, которая удовлетворяет
+
+\begin{equeation}
+    \hat{\mu} = min_{\hat{mu}} || \mu - \hat{\mu} ||_2
+\end{equation}
+
+Точное значение риска на практике не известно, так как истинное значение $\mu$ неизвестно. Для того чтобы получить оценку риска без необходимости знать истинное значение $\mu$ Штейн показывает, что для каждой оценки $\mu$, которая может быть записана как $\hat{\mu} = \boldsymbol{x} + g(\boldsymbol{x})$, где $g : \mathbb{R}^s \rightarrow \mathbb{R}^s$ и $g$ слабо дифференцируема, тогда риск может быть оценен как:
+
+\begin{equation}\label{eq:sure}
+    SURE(\hat{\mu}) = E_{\mu} || \mu - \hat{\mu}||_2^2 = s + E_\mu[||g(\boldsymbol{x})||_2^2 + 2\nabla * g(\boldsymbol{x})]
+\end{equation}
+
+где $\nabla \dot g(\dot)$ -- дивергенция $g$:
+
+\begin{equation}
+    \nabla \dot g(\boldsymbol{x}) = \sum_{i=1}^{s} \frac{\partial g_i}{\partial x_i}
+\end{equation}
+
+Положим $\omega_{jk}$ как $\boldsymbol{x}$. Используя выражение для мягкого порогового правила $\delta^S_{\lambda}$, можно заметить, что $\delta^S_{\lambda} (\boldsymbol{x}) = x + g(\boldsymbol{x})$, где:
+
+\begin{equation}
+    ||g(\boldsymbol{x})||_2^2 = \sum_{i = 1}^s [min(|X_i|, \lambda)]^2
+\end{equation}
+
+\begin{equation}
+    \dot g(\boldsymbol{x}) = \sum_{i=1}^{s} 1_{[-\lambda, \lambda]}(X_i)
+\end{equation}
+
+($1_A(x)$ -- понимается в смысле индикаторной функции на множестве $A$). Теперь возможно получить явное выражение для $SURE$:
+
+\begin{equation}\label{eq:sureex}
+    SURE(\lambda, \boldsymbol{x}) = s + \sum_{i = 1}^s [min(|X_i|, \lambda)]^2 - 2 \cdot # \{i: |X_i| < \lambda\}
+\end{equation}
+
+(Здесь под $#$ обозначим можность множеста). Явным преимуществом \ref{eq:sureex} является тот факт, что неизвестный параметр $\mu$ не появляется. Понятно, что пороговое значение $\lambda$ из \ref{eq:sureex} должно быть выбрано таким образом, что значение $SURE$ минимально:
+
+\begin{equation}\label{eq:suremin}
+    \lambda^* = argmin_{0 \leq \lambda \leq \sqrt{2\log s}} SURE(\lambda; \boldsymbol{x})
+\end{equation}
+
+```{r}
+"EXAMPLE PICTURE"
+```
+
+Передт тем как продолжить, следует заметить, что при поиске оптимального порогового значения $\lambda$ в \ref{eq:suremin} не принимаются во внимание значения, которые больше чем $\lambda_U = \sqrt{2\log s}$ (которое назовем __универсальной границей__). Причина этого состоит в следующем. Следуя теореме доказанной в [@donobo2], если $X_1, \dots, X_s$ независимы и одинаково распределены с нормальным законом распределения $\N(0, ~ 1)$, тогда:
+
+\begin{equation}
+    P\{max_{1 \leq i \leq s} |X_i| > \sqrt{2\log s} ~ \frac{1}{\sqrt{\pi \log s }} \over{s \rightarrow \infty}{\rightarrow}\}
+\end{equation}
+
+Как показано на рисунке #EXAMPLE PICTURE
+
+Верхняя граница
 
 ## NeighBlock
