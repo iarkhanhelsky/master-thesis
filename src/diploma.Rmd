@@ -35,6 +35,8 @@ bibliography: references.bib
 ```
 ```{r, child='Rmd/sequence.Rmd'}
 ```
+```{r, child='Rmd/denoising.Rmd'}
+```
 
 ```{r, child='Rmd/2dtransform.Rmd'}
 ```
