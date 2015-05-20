@@ -1,40 +1,60 @@
+source('r/images/images.r')
+lenna <- image.read('res/Lenna.png')
+require('ggplot2')
 
-require(png)
+freqs <- function(data) {
+  sapply(unique(data), function(t) sum(data == t) / length(data))
+}
 
-source('r/statistics.r')
+model.length <- 10000
+model.p.good <- 0.5
+model.p.bad <- 0.3
 
-lenna <- readPNG('res/Lenna.png')
+model.good <- rbinom(model.length, 1, model.p.good)
+model.bad <- rbinom(model.length, 1, model.p.bad)
 
-lenna.blue.bits <- (lenna[, , 3] * 255) %% 2
+gen.data.list <- function(data, desc='', alpha=0.05) {
+  f <- freqs(data)
+  p.value <- chisq.test(f)$p.value
+  list(
+    Description= desc,
+    Length = length(data),
+    Mean = mean(data),
+    Variance = var(data),
+    'P-value Chi' = p.value,
+    'Null Hypotesis' = ifelse(1-p.value < alpha, 'Accepted', 'Denied'),
+    Freqs = f
+  )
+}
 
-lipsum <-"Williamsburg selfies food truck bespoke. Roof party seitan meditation
-squid. Lumbersexual cred forage, paleo pop-up biodiesel flexitarian selvage
-disrupt Pitchfork Pinterest quinoa. Ugh swag selfies kitsch, forage try-hard
-meditation chillwave ethical flexitarian craft beer Odd Future art party
-tousled. Health goth swag actually, XOXO small batch pork belly hella ennui
-selfies Neutra PBR gentrify. You probably haven't heard of them meggings
-wayfarers, literally blog art party four loko sriracha cornhole Intelligentsia
-tattooed fixie gastropub pork belly. Retro scenester Thundercats banjo."
+bits <- function(x, len = 8) {
+  sapply(len:1, function(p) bitwShiftR(x, p - 1) %% 2)
+}
 
-text.bits <- c( # Converting to vector
-                # We need transpose matrix for proper vector expansion
-                 outer( # Map char list to bits matrix
-                       sapply(lipsum, utf8ToInt), # Each char to byte
-                       0:7,
-                       function(char, bit) bitwShiftR(char, bit) %% 2))
+vec.bits <- Vectorize(bits, vectorize.args = c('x'))
 
-lenna.bits.length <- length(lenna.blue.bits)
-text.bits.length <- length(text.bits)
-print(mean(text.bits))
-print(mean(lenna.blue.bits))
-bits.mix <- (lenna.blue.bits + # Take all image bits
-    c(rep(0, lenna.bits.length - text.bits.length), text.bits) # Add shifted
-    # text bits
-    ) %% 2 # take sum by module of 2
+data <- gen.data.list(model.good, paste('Выборка случайных величин распределенных по закону Бернулли с параметром p =', model.p.good))
 
-# Now we gonna test our hypotesis
+data <- rbind(data, 
+              gen.data.list(model.bad, paste('Выборка случайных величин распределенных по закону Бернулли с параметром p =', model.p.bad)))
 
-print(criterium.periodogram(2*bits.mix - 1))
+lenna <- image.bytes(image.read('res/Lenna.png'))
+lenna.mod.2 <- lenna %% 2
+lenna.mod.8 <- lenna %% 8
+data <- rbind(data, gen.data.list(as.vector(lenna.mod.2[, , 1]),'Младший бит цветовой компоненты картинки. Красный'))
+data <- rbind(data, gen.data.list(as.vector(lenna.mod.2[, , 2]),'Младший бит цветовой компоненты картинки. Зеленый'))
+data <- rbind(data, gen.data.list(as.vector(lenna.mod.2[, , 3]),'Младший бит цветовой компоненты картинки. Синий'))
+data <- rbind(data, gen.data.list(as.vector(lenna.mod.2),'Младший бит цветовой компоненты картинки. Совместно'))
+
+data <- rbind(data, gen.data.list(as.vector(lenna.mod.8[, , 1]),'Младшее битовое слово (длины 3) цветовой компоненты картинки. Красный'))
+data <- rbind(data, gen.data.list(as.vector(lenna.mod.8[, , 2]),'Младшее битовое слово (длины 3) цветовой компоненты картинки. Зеленый'))
+data <- rbind(data, gen.data.list(as.vector(lenna.mod.8[, , 3]),'Младшее битовое слово (длины 3) цветовой компоненты картинки. Синий'))
+data <- rbind(data, gen.data.list(as.vector(lenna.mod.8),'Младшее битовое слово (длины 3) компоненты картинки. Совместно'))
+
+data <- rbind(data, gen.data.list(as.vector(vec.bits(as.vector(lenna.mod.8[, , 1]), len=3)),'Младшее битовое слово (длины 3, побитно) цветовой компоненты картинки. Красный'))
+data <- rbind(data, gen.data.list(as.vector(vec.bits(as.vector(lenna.mod.8[, , 2]), len=3)),'Младшее битовое слово (длины 3, побитно) цветовой компоненты картинки. Зеленый'))
+data <- rbind(data, gen.data.list(as.vector(vec.bits(as.vector(lenna.mod.8[, , 3]), len=3)),'Младшее битовое слово (длины 3, побитно) цветовой компоненты картинки. Синий'))
+data <- rbind(data, gen.data.list(as.vector(vec.bits(as.vector(lenna.mod.8), len=3)),'Младшее битовое слово (длины 3, побитно) компоненты картинки. Совместно'))
 
 
-
+View(data.frame(data))
