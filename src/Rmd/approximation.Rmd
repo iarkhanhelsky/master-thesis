@@ -1,0 +1,28 @@
+## Апроксимация произвольной функции в пространстве $\mathbb{L}^2$ при помощи ортонормированного вейвлет-базиса.
+
+В силу построения любая вейвлет функция позволяет позволяет постююююдво джлвоаждалоп ждлв
+
+
+
+```{r, echo=FALSE}
+# f <- function(t) 2*sin(t) + exp(-2*t)
+# lower <- -5 * pi
+# upper <- 5 * pi
+# u5 <- space.expand(wavelet.approx(space.shrink(f, lower, upper), levels = 5), lower, upper)
+# u10 <- space.expand(wavelet.approx(space.shrink(f, lower, upper), levels = 10), lower, upper)
+# t <- seq(lower, upper, 0.01)
+# d <- data.frame(
+#   u5 = sapply( t, u5),
+#   u10 = sapply(t, u10),
+#   f = f(t),
+#   t = t
+#   )
+# 
+# d.long <- melt(d, id='t', value.name='u')
+# ggplot(data=data.long,
+#        aes(x=t, y=u, colour=variable)) +
+#   scale_colour_hue(labels =(c("a) 5 scaling levels approximation",
+#                               "b) 10 scaling levels approximation",
+#                               "c) Original function"))) +
+#   geom_line()
+```

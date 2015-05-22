@@ -33,4 +33,8 @@ integer.bits <- function(x, word.length) {
 	as.integer(intToBits(x))[1:word.length]
 }
 
+image.rgb2gray <- function(img) {
+  image.dim <- dim(img)
+  outer(1:image.dim[1], 1:image.dim[2], function(x, y) mean(img[x, y, ]))
+}
 
