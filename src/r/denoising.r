@@ -16,6 +16,30 @@ lambda.universal <- function(s) sqrt(2 * log(s))
 
 lambda.c <- 4.505
 
+SURE <- function(lambda, X) {
+  s <- length(X)
+  s + sum(sapply(X, function(x) min(lambda, X)^2)) - 2*sum(X[abs(X) < lambda])
+}
+
+lambda.sure <- function(X) {
+  optimise(function(l) SURE(l, X), lower=0, upper=lambda.universal(X))$minimum
+}
+
+lambda.sureShrink <- function(X) {
+  ifelse(sparsity(X) <= 1, lambda.universal(X), lambda.sure(X))
+}
+
+sparsity <- function(X) {
+  s <- length(X)
+  s^(1/2) * sum(X^2 - 1) / log2(s)^(3/2)
+}
+
+sure.shrink <- function(X, filter='d4') {
+    d <- dwt(X, filter = filter)
+    d@W <- lapply(d@W, function(w) t(t(thresholding.soft(w, lambda.universal(length(w))))))
+    print(d)
+    return(idwt(d))
+}
 
 vis.thresholding.types <- function(lambda, bound) {
   t <- seq(-bound, bound, 0.01)
@@ -26,6 +50,19 @@ vis.thresholding.types <- function(lambda, bound) {
     qplot(t, r.h, geom='line', main="Жесткая замена", ylab=expression(delta[h])),
     qplot(t, r.s, geom='line', main="Мягкая замена", ylab=expression(delta[s])),
     cols=2)
+}
+
+vis.noisy <- function(t, clean, noisy) {
+  data <- data.frame(
+    t = t,
+    noisy = noisy,
+    clean = clean
+  )
+  data.long <- melt(data, id='t', value.name='x')
+
+  ggplot(data=data.long, aes(x=t, y=x, colour=variable)) +
+    theme(legend.position="none") +
+    geom_line()
 }
 
  vis.universal.bound <- function(s = 1000) {

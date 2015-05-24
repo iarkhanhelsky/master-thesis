@@ -2,7 +2,6 @@ lambda.range.max <- 10
 
 ui.thresholds <- function() {
   tabPanel("Расчет и визуализация пороговых значений",
-           withMathJax(
              mainPanel(
                h3("Визуализация жесткой и мягкой замены значений вейвлет коэффициентов"),
                sliderInput("lambda", "Указать пороговое значение \\(\\lambda\\)",
@@ -11,7 +10,7 @@ ui.thresholds <- function() {
                h3("Расчет универсального порогового значения \\(\\lambda_U\\) в зависимости от размера выборки"),
                sliderInput("sample.length", "Длинна выборки \\(n\\) из нормального распределения \\(\\mathcal{N}(0, 1)\\)",
                            min = 100, max = 10000, value = 1000, step = 100),
-               plotOutput("universal"))))
+               plotOutput("universal")))
 }
 
 srv.thresholds <- function(input, output) {

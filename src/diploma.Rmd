@@ -2,11 +2,6 @@
 title: "Анализ изображений на основе вейвлетов Добеши"
 csl: style/citations.csl
 bibliography: references.bib
-outoput:
-  pdf_document: 
-    pandoc_args: [
-        '--include-after-body=../out/appendix.tex'
-        ]
 ---
 
 ```{r, echo=FALSE, message=FALSE}
@@ -15,7 +10,7 @@ outoput:
   require(reshape2)
   require(wavelets)
 
-  globals <- list(discorded.test.count=10000)
+  globals <- list(discorded.test.count=1)
 
   # Helpers for plotting
   source('r/helpers/visual.r')
@@ -52,11 +47,11 @@ outoput:
 
 ## Дискретное вейвлет преобразование преобразование
 
-  ### Одномерный случай
+### Одномерный случай
   
-  ### Двумерный случай
+### Двумерный случай
   
-  ### Применение вейвлет декомпозиции полноцветным изображениям
+### Применение вейвлет декомпозиции полноцветным изображениям
   
 ## Каскадный алгоритм Маллата
 

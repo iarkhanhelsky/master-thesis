@@ -7,15 +7,10 @@
 require(reshape2)
 require(ggplot2)
 t <- seq(0, 3*pi, 0.01)
-data <- data.frame(
-  noised = 3*sin(t) + rnorm(length(t)),
-  clean = 3*sin(t),
-  t = t)
-data.long <- melt(data, id='t', value.name='x')
+noised <- 3*sin(t) + rnorm(length(t))
+clean <- 3*sin(t)
 
-ggplot(data=data.long, aes(x=t, y=x, colour=variable)) +
-  theme(legend.position="none") +
-  geom_line()
+vis.noisy(t, clean, noised)
 ```
 
 Не смотря на то, что понятие ``фильтрация'' достаточно общеее, оно обычно относится к восстановлению сигнала, который был смешан с аддитивным белым Гауссовым шумом, нежели с какими-либо другими видами шумов (такими как не-аддитивный шум, шумы Пуассона, Лапласса и прочие). В этой главе мы сосредоточимся на случае, когда сигнал подвержен воздействию белого шума.
@@ -58,14 +53,7 @@ ggplot(data=data.long, aes(x=t, y=x, colour=variable)) +
 ```{r decomp, echo=FALSE, message=FALSE, fig.cap="Пример разложения модельных данных с помощью алгоритма Маллата используя вейвлет Добеши четвертого порядка(в качестве данных использовались показания катировок продаж Box\\&Jenkins, 1976 год). а) Оригинальные данные. b) кэффициенты второго уровня апроксимации c) детализационные коэффициенты, j=1", out.extra=''}
 
 d <- BJsales[1:128]
-
-w <- dwt(d, filter='d4')
-
-p1 <- ggplot() + geom_line(aes(1:length(d), d)) + xlab('t') + ylab('') + ggtitle('a)')
-p2 <- ggplot() + geom_line(aes(1:length(w@V$V2), w@V$V2)) + xlab('k') + ylab(expression(c[jk])) + ggtitle('b)')
-p3 <- ggplot() + geom_line(aes(1:length(w@W$W1), w@W$W1)) + xlab('k') + ylab(expression(d[jk])) + ggtitle('c)')
-
-visual.multiplot(p2, p3, p1, layout=t(matrix(c(3, 3, 1, 2), nrow=2)), cols=2)
+vis.decomp(d, filter='d4', 1, 1)
 
 ```
 
@@ -136,7 +124,7 @@ $$
 
 где, как было замечено ранее, $\lambda$ может быть функцией от переменных $j$ и $k$. Жесткое правило обычно и называют пороговым вейвлет методом, в то время как мягкое правило обычно называют вейвлет сжатием, так как оно сжимает коэффициенты с высоким уровнем энергии к нулю. Примеры преобразований представлены на Рисунке \ref{fig:hardsoft}
 
-```{r hardsoft, echo=FALSE, message=TRUE, fig.cap="Иллюстрация жесткой и мягкой замены вейвлет коэффициентов соотвественно $(\\lambda = 2)$", out.extra='', dev='png', dpi='128'}
+```{r hardsoft, echo=FALSE, message=TRUE, fig.cap="Иллюстрация жесткой и мягкой замены вейвлет коэффициентов соотвественно $(\\lambda = 2)$", out.extra='', dev='png', dpi=128}
 
 lambda <- 2
 bounds <- 10

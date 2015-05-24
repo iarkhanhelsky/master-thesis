@@ -20,3 +20,27 @@ wavelet.approx <- function(f, lower=0, upper=1, wavelet=wavelet.haar, levels=10)
 space.shrink <- function(f, lower, upper) function(t) f(lower + t * (upper - lower))
 
 space.expand <- function(f, lower, upper) function(t) f((t - lower) / (upper - lower))
+
+wt.list <- function() {
+  c(
+    "haar", "d4", "d6", "d8", "d10", "d12", "d14", "d16", "d18", "d20", # Daubechies
+    "l8", "l10", "l12", "l14", "l16", "l18", "l20", #Least Asymetric
+    "b14", "b18", "b20", #Best localized
+    "c6", "c12", "c18", "c24", "c30" # Coiflet
+    )
+}
+
+
+vis.decomp <- function(X, filter, dj, cj) {
+
+  d <- dwt(X, filter=filter)
+
+  w <- d@W[[dj]]
+  v <- d@V[[cj]]
+
+  visual.multiplot(qplot(1:length(v), v, xlab='k', ylab=(expression(c[jk])), geom='line'),
+                   qplot(1:length(w), w, xlab='k', ylab=(expression(d[jk])), geom='line'),
+                   qplot(1:length(X), X, xlab='t', ylab=('X'), geom='line'),
+                   layout=t(matrix(c(3, 3, 1, 2), nrow=2)), cols=2)
+
+}
