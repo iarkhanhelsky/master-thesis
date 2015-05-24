@@ -5,26 +5,19 @@ ui.thresholds <- function() {
            withMathJax(
              mainPanel(
                h3("Визуализация жесткой и мягкой замены значений вейвлет коэффициентов"),
-               sliderInput("lambda", "$$\\lamda$$",
+               sliderInput("lambda", "Указать пороговое значение \\(\\lambda\\)",
                            min = 0, max = lambda.range.max, value = 2, step= 0.5),
                plotOutput("thresholding"),
-               h3("Расчет универсального порогового значения в зависимости от размера выборки"),
-               sliderInput("sample.length", "n",
+               h3("Расчет универсального порогового значения \\(\\lambda_U\\) в зависимости от размера выборки"),
+               sliderInput("sample.length", "Длинна выборки \\(n\\) из нормального распределения \\(\\mathcal{N}(0, 1)\\)",
                            min = 100, max = 10000, value = 1000, step = 100),
-               plotOutput("unviversal"))))
+               plotOutput("universal"))))
 }
 
 srv.thresholds <- function(input, output) {
   output$thresholding <- renderPlot({
-    lambda <- input$lambda
-    t <- seq(-lambda.range.max, lambda.range.max, 0.01)
-    visual.multiplot(
-      qplot(t, thresholding.hard(t, lambda), geom='line', main='Жесткая замена', xlab='t', ylab=expression(delta[h])),
-      qplot(t, thresholding.soft(t, lambda), geom='line', main='Mягкая замена', xlab='t', ylab=expression(delta[s])),
-      cols = 2)})
+    vis.thresholding.types(input$lambda, lambda.range.max)})
 
   output$universal <- renderPlot({
-    bound <- input$sample.length
-
-  })
+    vis.universal.bound(input$sample.length)})
 }
