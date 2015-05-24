@@ -37,7 +37,6 @@ sparsity <- function(X) {
 sure.shrink <- function(X, filter='d4') {
     d <- dwt(X, filter = filter)
     d@W <- lapply(d@W, function(w) t(t(thresholding.soft(w, lambda.universal(length(w))))))
-    print(d)
     return(idwt(d))
 }
 
@@ -78,4 +77,23 @@ vis.noisy <- function(t, clean, noisy) {
     geom_point() +
     geom_hline(color='red', yintercept=lambda.universal(s)) +
     annotate("text", 0, ymin = lambda.universal(s),y=lambda.universal(s) * 1.05, label = "lambda[U]", parse=TRUE, show_guide=TRUE)
+}
+
+
+vis.diff <- function(t, clean, restored) {
+  d <- data.frame(
+    t = t,
+    clean = clean,
+    restored = restored
+  )
+
+  d$min <- pmin(d$clean, d$restored)
+  d$max <- pmax(d$clean, d$restored)
+
+  ggplot(d) +
+    ylab("x(t)") +
+    xlab("t") +
+    geom_line(aes(x=t, y=clean, color='blue')) +
+    geom_ribbon(aes(x=t, ymin=min, ymax=max), fill="grey", alpha=.4) +
+    geom_line(aes(x=t, y=restored, color='red'))
 }

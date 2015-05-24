@@ -20,8 +20,10 @@ ui.denoise1d <- function() {
              ),
            h3('SureShrink'),
            plotOutput('sure.shrink'),
+           fluidRow("Среднеквадратическая ошибка \\(\\int (f(t) - r(t))^2 dt = \\)", textOutput('sure.error', inline = T)),
            h3('NeighBlock'),
-           plotOutput('neight.block')
+           plotOutput('neigh.block'),
+           fluidRow("Среднеквадратическая ошибка \\(\\int (f(t) - r(t))^2 dt = \\)", textOutput('neigh.error', inline = T))
            )
 }
 
@@ -69,8 +71,26 @@ srv.denoise1d <- function(input, output) {
     vis.decomp(model.data()$noise, filter=input$filter, input$decomp.dj, input$decomp.app)
   })
 
+  sure.result <- reactive({
+    sure.shrink(model.data()$noise, input$filter)
+  })
+
   output$sure.shrink <- renderPlot({
-      qplot(model.data()$t, sure.shrink(model.data()$noise, filter=input$filter), geom='line')
+   vis.diff(model.data()$t, model.data()$noise, sure.result())
+  })
+
+  output$sure.error <- renderText({
+    mean((model.data()$clean - sure.result())^2)
+  })
+
+  neigh.result <- sure.result
+
+  output$neigh.block <- renderPlot({
+    vis.diff(model.data()$t, model.data()$noise, neigh.result())
+  })
+
+  output$neigh.error <- renderText({
+    mean((model.data()$clean - neigh.result())^2)
   })
 }
 
