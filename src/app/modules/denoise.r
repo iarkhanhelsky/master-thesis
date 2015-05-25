@@ -29,7 +29,24 @@ ui.denoise1d <- function() {
 
 ui.denoise2d <- function() {
   tabPanel("Решение задачи фильтрации в двумерном случае",
-           h3("This is the first panel"))
+           selectInput('select.img', 'Изображение для обработки', choices = list.files('www/', '*.png')),
+           plotOutput('src.img'),
+           sliderInput('noise.level', 'Уровень шума', min = 0, max=1, step=0.05, value=0.5),
+           plotOutput('img.noisy'),
+           hr(),
+           selectInput('wt', 'Вейвлет фильтры', choices = wt2d.list(), selected = 'd4'),
+           hr(),
+           h3('SureShrink'),
+           plotOutput('sure.res'),
+           fluidRow("Среднеквадратическая ошибка \\(\\int (f(t) - r(t))^2 dt = \\)", textOutput('sure2.error', inline = T)),
+           fluidRow("Отношение сигнал / шум", fixedRow("До ", textOutput("snr.sure.before", inline = T)),
+                    fixedRow("После ", textOutput('snr.sure.after', inline = T))),
+           hr(),
+           h3('NeighBlock'),
+           plotOutput('neigh.res'),
+           fluidRow("Среднеквадратическая ошибка \\(\\int (f(t) - r(t))^2 dt = \\)", textOutput('neigh2.error', inline = T))
+           )
+
 }
 
 srv.denoise1d <- function(input, output) {
@@ -76,7 +93,7 @@ srv.denoise1d <- function(input, output) {
   })
 
   output$sure.shrink <- renderPlot({
-   vis.diff(model.data()$t, model.data()$noise, sure.result())
+   vis.diff(model.data()$t, model.data()$clean, sure.result())
   })
 
   output$sure.error <- renderText({
@@ -86,7 +103,7 @@ srv.denoise1d <- function(input, output) {
   neigh.result <- sure.result
 
   output$neigh.block <- renderPlot({
-    vis.diff(model.data()$t, model.data()$noise, neigh.result())
+    vis.diff(model.data()$t, model.data()$clean, neigh.result())
   })
 
   output$neigh.error <- renderText({
@@ -96,4 +113,66 @@ srv.denoise1d <- function(input, output) {
 
 srv.denoise2d <- function(input, output) {
 
+  img <- reactive({
+    im <- readPNG(paste('www', input$select.img, sep='/'))
+    if (length(dim(im)) == 3) {
+      return (im[, , 1])
+    }
+    else
+      return(im)
+  })
+
+  noisy.img <- reactive({
+    i <- img()
+    d <- dim(i)
+    i + input$noise.level * matrix(rnorm(d[1] * d[2]), ncol=d[1])
+  })
+
+  sure2.result <- reactive({
+    sure.shrink2(noisy.img(), input$wt)
+  })
+
+  sure2.error <- reactive({
+    var(as.vector(img() - sure2.result()))
+  })
+
+  output$source.img <- renderImage({
+    list(
+      src = "www/Lenna.png",
+      filetype = "image/png",
+      alt = "Lenna"
+    )
+  }, deleteFile=FALSE)
+
+  output$src.img <- renderPlot({
+    plot.image(img())
+  })
+
+  output$img.noisy <- renderPlot({
+    plot.image(noisy.img())
+  })
+
+  snr <- reactive({
+    var(as.vector(img())) / var(as.vector(img() - noisy.img()))
+  })
+
+  snr.sure <- reactive({
+    var(as.vector(img())) / var(as.vector(img() - sure2.result()))
+  })
+
+  output$sure.res <- renderPlot({
+    plot.image(sure2.result())
+  })
+
+  output$sure2.error <- renderText({
+    round(sure2.error(), 4)
+  })
+
+  output$snr.sure.before <- renderText({
+    round(snr(), 4)
+  })
+
+  output$snr.sure.after <- renderText({
+    round(snr.sure(), 4)
+  })
 }

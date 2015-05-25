@@ -30,6 +30,10 @@ wt.list <- function() {
     )
 }
 
+wt2d.list <- function() {
+  c('haar', 'd4', 'd6', 'd8', 'la8')
+}
+
 
 vis.decomp <- function(X, filter, dj, cj) {
 

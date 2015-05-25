@@ -26,7 +26,7 @@ lambda.sure <- function(X) {
 }
 
 lambda.sureShrink <- function(X) {
-  ifelse(sparsity(X) <= 1, lambda.universal(X), lambda.sure(X))
+  ifelse(sparsity(X) <= 1, lambda.universal(length(X)), lambda.sure(X))
 }
 
 sparsity <- function(X) {
@@ -36,8 +36,18 @@ sparsity <- function(X) {
 
 sure.shrink <- function(X, filter='d4') {
     d <- dwt(X, filter = filter)
-    d@W <- lapply(d@W, function(w) t(t(thresholding.soft(w, lambda.universal(length(w))))))
+    d@W <- lapply(d@W, function(w) t(t(thresholding.soft(w, lambda.sureShrink(w)))))
     return(idwt(d))
+}
+
+sure.shrink2 <- function(X, filter) {
+  d <- dwt.2d(X, filter)
+  for(name in grep('HH', names(d), value=TRUE)) {
+    w <- c(d[[name]])
+    r <- thresholding.soft(w, lambda.sureShrink(w))
+    d[[name]] <- matrix(r, nrow=dim(d[[name]])[1])
+  }
+  idwt.2d(d)
 }
 
 vis.thresholding.types <- function(lambda, bound) {

@@ -33,8 +33,11 @@ integer.bits <- function(x, word.length) {
 	as.integer(intToBits(x))[1:word.length]
 }
 
-image.rgb2gray <- function(img) {
-  image.dim <- dim(img)
-  outer(1:image.dim[1], 1:image.dim[2], function(x, y) mean(img[x, y, ]))
+plot.image <- function(img) {
+  if (length(dim(img)) == 3) {
+    r <- img[, , 1]
+  } else {
+    r <- img
+  }
+  image(t(r)[1:(dim(r)[1]) , (dim(r)[2]):1], asp=1, useRaster = T, col=palette(sapply(seq(0, 1, length.out=255), gray)))
 }
-
