@@ -1,16 +1,107 @@
-
+```{r}
+source('r/statistics.r')
+source('r/denoising.r')
+source('r/wavelets.r')
+source('r/generators.r')
+source('r/model.data.r')
+```
 \appendix
 
 # Приложение {-}
 
 ## Проверка гипотезы о разладке последовательности. Генерация данных. Сравнение результатов.
+* Функция, которая порождает генератор бернулевской последовательности с заданным параметром p  Bernoulli
+```{r, code=capture.output(dump('generator.Bernoulli', '')), tidy=TRUE, highlight=TRUE}
+```
 
+* Функция, которая объеденит два генератора, при этом, первые $n$ значений будут получены из первого генератора, а последующие значения будут получены из второго генератора.
+```{r, code=capture.output(dump('generator.njoin', '')), tidy=TRUE, highlight=TRUE}
+
+```
+
+Из двух описанных выше функций, несложно получить генератор порождающий исходные данные для нашей задачи
+```{r, code=capture.output(dump('generator.sequence', '')), tidy=TRUE, highlight=TRUE}
+```
+
+* Быстрое вейвлет преобразование на основе вейвлета Хаара
+```{r, code=capture.output(dump('d.jk', '')), tidy=TRUE, highlight=TRUE}
+```
+
+* Общая схема для расчета вейвлет статистики
+```{r, code=capture.output(dump('T.j', '')), tidy=TRUE, highlight=TRUE}
+```
+
+* Статистика определяющая периодограмму ряда на данном уровне разложения
+```{r, code=capture.output(dump('P.j', '')), tidy=TRUE, highlight=TRUE}
+```
+
+* Статистика определяющая скейлограмму ряда на данном уровне разложения
+```{r, code=capture.output(dump('S.j', '')), tidy=TRUE, highlight=TRUE}
+```
+
+* Общая схема проверки гипотезы для задачи разладки последовательности 
+```{r, code=capture.output(dump('criterium', '')), tidy=TRUE, highlight=TRUE}
+```
+
+* Проверка гипотезы, использующая критерий максимума периодограммы
+```{r, code=capture.output(dump('criterium.periodogram', '')), tidy=TRUE, highlight=TRUE}
+```
+
+* Проверка гипотезы, использующая критерий максимума скелограммы
+```{r, code=capture.output(dump('criterium.scalegram', '')), tidy=TRUE, highlight=TRUE}
+```
+\newpage
 ## Реализация общей схемы фильтрации одномерных и двумерных сигналов с произвольным вейвлет фильтром.
+* Реализация жесткой замены 
+```{r, code=capture.output(dump('thresholding.hard', '')), tidy=TRUE, highlight=TRUE}
+```
 
-## Решение задачи фильтрации сигнала с применением метода SureShrink. Оценка результатов.
+* Реализация мягкой замены
+```{r, code=capture.output(dump('thresholding.soft', '')), tidy=TRUE, highlight=TRUE}
+```
+## Решение задачи фильтрации сигнала с применением метода SureShrink
 
-## Решение задачи фильтрации сигнала с применением метода NeighBlock. Оценка результатов.
+* Построение оценки $\lambda_U$
+```{r, code=capture.output(dump('lambda.universal', '')), tidy=TRUE, highlight=TRUE}
+```
 
-## Решение задачи фильтрации сигнала в случае изображения (градации серого).
+* Определение разреженности ряда
+```{r, code=capture.output(dump('sparsity', '')), tidy=TRUE, highlight=TRUE}
+```
+
+* Расчет $SURE(\lambda, X)$
+```{r, code=capture.output(dump('SURE', '')), tidy=TRUE, highlight=TRUE}
+```
+
+* Реализация поиска оптимального значения $\lambda^*$
+```{r, code=capture.output(dump('lambda.sure', '')), tidy=TRUE, highlight=TRUE}
+```
+
+* Реализация выбора оптимального значения в зависимости от разреженности ряда 
+```{r, code=capture.output(dump('lambda.sureShrink', '')), tidy=TRUE, highlight=TRUE}
+```
+
+* Реализация метода SureShrink в одномерном случае
+```{r, code=capture.output(dump('sure.shrink', '')), tidy=TRUE, highlight=TRUE}
+```
+
+* Реализация метода SureShrink в двумерном случае
+```{r, code=capture.output(dump('generator.sequence', '')), tidy=TRUE, highlight=TRUE}
+```
+## Решение задачи фильтрации сигнала с применением метода NeighBlock
+\newpage
 
 ## Реализация интерактивной системы для применения алгоритмов шумоподавления основанных на вейвлет преобразовании.
+
+* Реализация модуля иллюстрации построения пороговых оценок
+\lstinputlisting{app/modules/thresholds.r}
+
+* Реализация модулей для произведения шумоподавления одномерного и двумерного сигналов
+\lstinputlisting{app/modules/denoise.r}
+\newpage
+* Каркас веб приложения 
+\lstinputlisting{app/global.r}
+
+\lstinputlisting{app/ui.r}
+
+\lstinputlisting{app/server.r}

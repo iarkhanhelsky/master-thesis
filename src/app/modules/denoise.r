@@ -44,7 +44,9 @@ ui.denoise2d <- function() {
            hr(),
            h3('NeighBlock'),
            plotOutput('neigh.res'),
-           fluidRow("Среднеквадратическая ошибка \\(\\int (f(t) - r(t))^2 dt = \\)", textOutput('neigh2.error', inline = T))
+           fluidRow("Среднеквадратическая ошибка \\(\\int (f(t) - r(t))^2 dt = \\)", textOutput('neigh2.error', inline = T)),
+           fluidRow("Отношение сигнал / шум", fixedRow("До ", textOutput("snr.neigh.before", inline = T)),
+                    fixedRow("После ", textOutput('snr.neigh.after', inline = T)))
            )
 
 }
@@ -100,7 +102,9 @@ srv.denoise1d <- function(input, output) {
     mean((model.data()$clean - sure.result())^2)
   })
 
-  neigh.result <- sure.result
+  neigh.result <- reactive({
+    neigh.block(model.data()$noise, input$filter)
+  })
 
   output$neigh.block <- renderPlot({
     vis.diff(model.data()$t, model.data()$clean, neigh.result())
@@ -174,5 +178,34 @@ srv.denoise2d <- function(input, output) {
 
   output$snr.sure.after <- renderText({
     round(snr.sure(), 4)
+  })
+
+
+  neigh2.result <- reactive({
+    neigh.block2(noisy.img(), input$wt)
+  })
+
+  neigh2.error <- reactive({
+    var(as.vector(neigh2.result() - img()))
+  })
+
+  snr.neigh <- reactive({
+    var(as.vector(img())) / var(as.vector(img() - neigh2.result()))
+  })
+#
+  output$neigh.res <- renderPlot({
+    plot.image(neigh2.result())
+  })
+
+  output$neigh2.error <- renderText({
+    round(neigh2.error(), 4)
+  })
+
+  output$snr.neigh.before <- renderText({
+    round(snr(), 4)
+  })
+
+  output$snr.neigh.after <- renderText({
+    round(snr.neigh(), 4)
   })
 }

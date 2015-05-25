@@ -1,3 +1,7 @@
+dwt.1d <- wavelets::dwt
+idwt.1d <- wavelets::dwt
+
+
 wavelet.haar <- function(t, j = 0, k = 0) {
   haar.mother <- function(t) {
     sapply(t, function(x) ifelse( 0 <= x && x < 0.5, 1, ifelse(0.5 <= x && x <= 1, -1, 0)))
@@ -37,7 +41,7 @@ wt2d.list <- function() {
 
 vis.decomp <- function(X, filter, dj, cj) {
 
-  d <- dwt(X, filter=filter)
+  d <- dwt.1d(X, filter=filter)
 
   w <- d@W[[dj]]
   v <- d@V[[cj]]

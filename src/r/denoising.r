@@ -12,6 +12,9 @@ thresholding.soft <- function(x, lambda) {
   t
 }
 
+dwt.1d <- wavelets::dwt
+idwt.1d <- wavelets::idwt
+
 lambda.universal <- function(s) sqrt(2 * log(s))
 
 lambda.c <- 4.505
@@ -22,7 +25,7 @@ SURE <- function(lambda, X) {
 }
 
 lambda.sure <- function(X) {
-  optimise(function(l) SURE(l, X), lower=0, upper=lambda.universal(X))$minimum
+  optimise(function(l) SURE(l, X), lower=0, upper=lambda.universal(length(X)))$minimum
 }
 
 lambda.sureShrink <- function(X) {
@@ -35,9 +38,9 @@ sparsity <- function(X) {
 }
 
 sure.shrink <- function(X, filter='d4') {
-    d <- dwt(X, filter = filter)
+    d <- dwt.1d(X, filter = filter)
     d@W <- lapply(d@W, function(w) t(t(thresholding.soft(w, lambda.sureShrink(w)))))
-    return(idwt(d))
+    return(idwt.1d(d))
 }
 
 sure.shrink2 <- function(X, filter) {
@@ -45,6 +48,50 @@ sure.shrink2 <- function(X, filter) {
   for(name in grep('HH', names(d), value=TRUE)) {
     w <- c(d[[name]])
     r <- thresholding.soft(w, lambda.sureShrink(w))
+    d[[name]] <- matrix(r, nrow=dim(d[[name]])[1])
+  }
+  idwt.2d(d)
+}
+
+neigh.block.base <- function(w) {
+  n <- length(w)
+  l0 <- floor(log(n) / 2)
+  l1 <- max(1, floor(l0 / 2))
+  djk <- c(w)
+  if (l0 > 0)
+  {
+    group.count <- n / l0
+    wext <- c(w, w, w)
+    l <- l0 + 2 * l1
+    for(g in 1:group.count) {
+      gl <- n + (g-1)*l - l1
+      gh <- gl + l
+      if (abs(gl - gh) > 1) {
+        sc <- sum(wext[gl:gh] ^ 2)
+
+        kl <- (g-1)*l0 + 1
+        kh <- g*l0 + 1
+        if (abs(kl- kh) > 1 && sc != 0) {
+          djk[kl:kh] <- sapply(kl:kh, function(k) max(0, (sc^2 - lambda.c*l)/sc) * w[k])
+        }
+      }
+    }
+  }
+  djk[is.na(djk)] <- 0
+  djk
+}
+
+neigh.block <- function(X, filter) {
+  d <- dwt.1d(X, filter = filter)
+  d@W <- lapply(d@W, function(w) matrix(neigh.block.base(w)))
+  return(idwt.1d(d))
+}
+
+neigh.block2 <- function(X, filter) {
+  d <- dwt.2d(X, filter)
+  for(name in grep('HH', names(d), value=TRUE)) {
+    w <- c(d[[name]])
+    r <- neigh.block.base(as.vector(w))
     d[[name]] <- matrix(r, nrow=dim(d[[name]])[1])
   }
   idwt.2d(d)
