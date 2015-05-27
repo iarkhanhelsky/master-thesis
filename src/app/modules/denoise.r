@@ -192,7 +192,7 @@ srv.denoise2d <- function(input, output) {
   snr.neigh <- reactive({
     var(as.vector(img())) / var(as.vector(img() - neigh2.result()))
   })
-#
+
   output$neigh.res <- renderPlot({
     plot.image(neigh2.result())
   })
