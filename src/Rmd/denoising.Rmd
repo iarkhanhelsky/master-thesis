@@ -197,7 +197,7 @@ vis.thresholding.types(lambda, bounds)
 где $\nabla g(t)$ -- дивергенция $g$:
 
 \begin{equation}
-    \nabla \dot g(\mathbf{x}) = \sum_{i=1}^{s} \frac{\partial g_i}{\partial x_i}
+    \nabla \g(\mathbf{x}) = \sum_{i=1}^{s} \frac{\partial g_i}{\partial x_i}
 \end{equation}
 
 Положим $\omega_{jk}$ как $\mathbf{x}$. Используя выражение для мягкого порогового правила $\delta^S_{\lambda}$, можно заметить, что $\delta^S_{\lambda} (\mathbf{x}) = x + g(\mathbf{x})$, где:
@@ -207,7 +207,7 @@ vis.thresholding.types(lambda, bounds)
 \end{equation}
 
 \begin{equation}
-    \dot g(\mathbf{x}) = \sum_{i=1}^{s} 1_{[-\lambda, \lambda]}(X_i)
+    g(\mathbf{x}) = \sum_{i=1}^{s} 1_{[-\lambda, \lambda]}(X_i)
 \end{equation}
 
 ($1_A(x)$ -- понимается в смысле индикаторной функции на множестве $A$). Теперь возможно получить явное выражение для $SURE$:
@@ -223,10 +223,10 @@ vis.thresholding.types(lambda, bounds)
 \end{equation}
 
 ```{r lambdau, echo=FALSE, message=FALSE, fig.cap="Универсальное пороговое значение расчитанноне по выборке из N(0, 1) размером 10000", dev='png', dpi=128, out.extra=''}
-vis.universal.bound(1000)
+vis.universal.bound(10000)
 ```
 
-Передт тем как продолжить, следует заметить, что при поиске оптимального порогового значения $\lambda$ в \ref{eq:suremin} не принимаются во внимание значения, которые больше чем $\lambda_U = \sqrt{2\log s}$ (которое назовем __универсальной границей__). Причина этого состоит в следующем. Следуя теореме доказанной в [@donobo2], если $X_1, \dots, X_s$ независимы и одинаково распределены с нормальным законом распределения $N(0, ~ 1)$, тогда:
+Перед тем как продолжить, следует заметить, что при поиске оптимального порогового значения $\lambda$ в \ref{eq:suremin} не принимаются во внимание значения, которые больше чем $\lambda_U = \sqrt{2\log s}$ (которое назовем __универсальной границей__). Причина этого состоит в следующем. Следуя теореме доказанной в [@donobo2], если $X_1, \dots, X_s$ независимы и одинаково распределены с нормальным законом распределения $N(0, ~ 1)$, тогда:
 
 \begin{equation}\label{eq:sureprob}
     P\{max_{1 \leq i \leq s} |X_i| > \sqrt{2\log s}\} \mathtt{\sim} \frac{1}{\sqrt{\pi \log s }} \underset{s \rightarrow \infty}{\rightarrow} 0
@@ -295,4 +295,24 @@ P\{\underset{b}{max} S_b^2 > \lambda_CL\} \underset{s \rightarrow \infty}{\right
 
 ## Сравнение методов SureShrink и NeighBlock
 
+Практические эксперименты показывают, что в случае одномерного сигнала NeighBlock показывает значительно лучшие результаты чем SureShrink при использовании одного и того же фильтра. Что проиллюстрировано рисунками ниже.
 
+```{r sureRes, echo=FALSE, fig.cap='Результат работы метода SureShrink. Серым обозначен накладываемый шум. Красным исходный сигнал. Голубым -- восстановленный сигнал.'}
+t <- seq(0, 1, length.out=1024)
+x <- sin(10* pi * t) * exp(cos(t))
+n <- rnorm(1024) * 0.05
+
+vis.diff(t, x , sure.shrink(n + x, 'd8')) + geom_line(aes(t, n), color='gray') + theme(legend.position = 'none')
+```
+
+
+```{r neighRes, echo=FALSE, fig.cap='Результат работы метода NeighBlock. Серым обозначен накладываемый шум. Красным исходный сигнал. Голубым -- восстановленный сигнал.'}
+vis.diff(t, x, neigh.block(n + x, 'd8')) + geom_line(aes(t, n), color='gray')  + theme(legend.position = 'none')
+```
+
+В случае NeighBlock среднеквадратическая ошибка в среднем на 15% ниже чем в случае SureShrink при использовании одного и того же фильтра и одинакового числа уровней. Однако, стоит заметить, что при достаточно высоком уровне шума, NeighBlock дает намного более ощутимую и визуально заметную ошибку фильтрации, как показано на Рисунке \ref{fig:neigherror}
+
+```{r neighRes, echo=FALSE, fig.cap='Результат работы метода NeighBlock на сильно зашумленных данных. Серым обозначен накладываемый шум. Красным -- исходный сигнал.', out.extra=''}
+n <- rnorm(1024) * 0.2
+vis.diff(t, x, neigh.block(n + x, 'd8')) + geom_line(aes(t, n), color='gray')  + theme(legend.position = 'none')
+```
