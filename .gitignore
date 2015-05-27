@@ -4,3 +4,7 @@ out
 *.knit.md
 **.RData
 .Rproj.user
+presentation/*tex
+presentation/*pdf
+presentation/*html
+presentation/*_files/*
