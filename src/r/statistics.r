@@ -114,3 +114,10 @@ eta.jk <- function(X, j, k, psi = wavelet.haar) {
 
   sum(acf.values * wacf.values)
 }
+
+
+#' DWT for current level (periodogramm)
+d.j <- function(X, j) {
+  k.max <- 2^(log2(length(X)) - j) - 1
+  return(sapply(0:k.max, function(k) d.jk(X, j, k)))
+}
