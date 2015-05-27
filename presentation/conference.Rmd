@@ -3,17 +3,21 @@
 title: "Алгоритмы обработки временных рядов на основе вейвлетов Хаара"
 author: "Архангельский Илья Андреевич"
 output:
-  ioslides_presentation:
-    incremental: yes
   beamer_presentation:
     includes:
-      in_header: ../src/style/header_simple.tex
+      in_header: ../src/style/header_beamer.tex
     incremental: yes
     keep_tex: yes
     toc: yes
+  ioslides_presentation:
+    incremental: yes
   slidy_presentation:
     incremental: yes
 ---
+```{r, echo=FALSE, message=FALSE}
+source('../src/r/helpers/visual.r')
+source('../src/r/statistics.r')
+```
 ## План 
 
 - Введение
@@ -161,14 +165,14 @@ $$
 
 В указаных выше условиях легко показать, что математическое ожидание ряда, полученного в результате
 вейвлет преобразования равно 0:
-$$
+
 \begin{align}
 E[d_{jk}^{\psi}(X)] = \\
 E[\sum_{t=0}^{T-1}X(t)  \psi_{jk}(t)] = \\ 
 \sum_{t=0}^{T-1}E[X(t)\psi_{jk}(t)] = \\
 \sum_{t=0}^{T-1}E[X(t)]E[\psi_{jk}(t)] = 0
 \end{align}
-$$
+
 
 ----
 
@@ -227,7 +231,7 @@ Y[28] = -X[28]
 ----
 
 ```{r, echo=FALSE, prompt=FALSE, warning=FALSE, message=FALSE}
-source('../src/r/helpers/visual.r')
+
 visual.multiplot(plot.j(X, Y, 0), plot.j(X, Y, 1), plot.j(X, Y, 2), plot.j(X, Y, 3), plot.j(X, Y, 4), plot.j(X, Y, 5), cols=2)
 ```
 
@@ -244,23 +248,23 @@ $$
 $$
 
 Причем, $X_1(\cdot)$ и $X_2(\cdot)$ такие, что 
-$$
+
 \begin{align}
   P(X_1(t) = 1) = p_1 \forall t \\
   P(X_2(t) = 1) = p_2 \forall t
 \end{align}
-$$
+
 
 ----
 
 Исходя из сформулированной выше модели можем получить нулевую и альтернативную гипотезу. 
 
-$$
+
 \begin{align}
   H_0: p_1 = p_2 \\
   H_1: p_1 \neq p_2
 \end{align}
-$$
+
 
 
 Иными словами наша задача определить имеет ли последовательность $X(\cdot)$ разладку. И определить момент $t_0$ в который эта разладка произошла.
@@ -278,12 +282,12 @@ X <- generator.Bernoulli(0.5)(64)
 Y <- c(X[1:32], generator.Bernoulli(0.3)(32))
 ```
 Для выполнения приведенных ранее предположений преобразуем данные последовательности следующим образом:
-$$
+
 \begin{align}
   \hat{X} = 2 * X - 1 \\
   \hat{Y} = 2 * Y - 1 
 \end{align}
-$$
+
 
 ----
 
@@ -411,7 +415,7 @@ $$
 Для оценки вероятностей ошибок второго рода моделируемые последовательности состояли из двух однородных фрагментов длинной $T_1 = T_2 = T/2$ с разладкой в момент времени $\tau$, соотвественно равной $2^7$,$2^9$,$2^{11}$. Первый фрагмент представлял собой случайную бинарную последовательность с вероятностью $p = 0.5$, а для второго фрагмента вероятность $p$ принимала значения $0.05, 0.1, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45$.
 
 ## Оценки ошибок первого и второго рода.
-```{r, echo=FALSE, fig.height=5}
+```{r, echo=FALSE, message=FALSE, fig.height=5}
 
 require(ggplot2)
 require(reshape2)
@@ -440,10 +444,10 @@ errors <- data.frame(
 data.long <- melt(errors, id='k', value.name='error')
 ggplot(data=data.long,
        aes(x=k, y=error, colour=variable)) +
-  scale_colour_hue(labels =(c("а) False negative. Scalegram",
-                              "b) False negative. Periodogram",
-                              "c) False positive. Scalegram",
-                              "d) False positive. Periodogram"))) +
+  scale_colour_hue(labels =(c("a) False negative Scalegram",
+                              "b) False negative Periodogram",
+                              "c) False positive Scalegram",
+                              "d) False positive Periodogram"))) +
   facet_wrap(~variable) +
   geom_line()
 ```
@@ -453,4 +457,4 @@ ggplot(data=data.long,
 - Точность оценки растет с увеличением длинны последовательности
 - Указанные критерии могут успешно применятся в различных приложениях
 - Точное место может быть с легкостью восстановлено по формуле $\tau = 2^{j_0} + k_0$, где $j_0, ~ k_0$ - уровень детализации и смещение на которых нулевая гипотеза не выполняется соотвественно.
-- ...
+
